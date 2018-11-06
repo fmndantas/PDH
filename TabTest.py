@@ -30,11 +30,7 @@ class Interface(QTabWidget):
 		# Initializes graph for path finding
 		self.Graph = []
 
-		# Initialization of interface
-		#self.layout = QFormLayout()
-
 		# Tab try
-		# self.tabTogether = QTabWidget()
 		self.InputWindow = QWidget()
 		self.OutputWindow = QWidget()
 
@@ -77,12 +73,6 @@ class Interface(QTabWidget):
 		self.ChannelsAndLpsMatrixBtn.clicked.connect(self.ShowChannelsMatrix)
 		self.layout.addWidget(self.ChannelsAndLpsMatrixBtn, 3, 2)
 
-		'''
-		self.OutputBtn = QPushButton('Output data')
-		self.OutputBtn.clicked.connect(self.ShowOutputMainFrame)
-		self.layout.addWidget(self.OutputBtn, 5, 2)
-		'''
-
 		self.UpdateLabel = QLabel('')
 		self.layout.addWidget(self.UpdateLabel, 6, 1)
 
@@ -95,20 +85,6 @@ class Interface(QTabWidget):
 
 		self.layoutOut = QGridLayout()
 
-		'''
-		self.DistMatrixBtn = QPushButton('Distance Matrix')
-		self.DistMatrixBtn.clicked.connect(self.ShowDistMatrix)
-		self.layoutOut.addWidget(self.DistMatrixBtn, 2, 2)
-
-		self.ChannelsAndLpsMatrixBtn = QPushButton('Channels and LP\'s\nmatrix')
-		self.ChannelsAndLpsMatrixBtn.clicked.connect(self.ShowChannelsMatrix)
-		self.layoutOut.addWidget(self.ChannelsAndLpsMatrixBtn, 3, 2)
-		
-		self.OutputBtn = QPushButton('Output data')
-		self.OutputBtn.clicked.connect(self.ShowOutputMainFrame)
-		self.layoutOut.addWidget(self.OutputBtn, 5, 2)
-		'''
-
 		self.ChannelsPerPathBtn = QPushButton('Channels per path')
 		self.ChannelsPerPathBtn.clicked.connect(self.ChannelsPerPath) # Process and return the Cpp matrix
 		self.ChannelsPerPathBtn.clicked.connect(self.ShowCppMatrix) # Shows the Cpp matrix
@@ -116,27 +92,6 @@ class Interface(QTabWidget):
 
 		self.setTabText(1, "Output window")
 		self.OutputWindow.setLayout(self.layoutOut)
-
-	'''
-	def ShowOutputMainFrame(self): # Window that pop up when the Output window button is pressed
-		self.OutputMainframe = QDialog()
-		self.OutputMainframe.setWindowTitle('Output window')
-		self.OutputMainframeGrid = QGridLayout()
-
-		#self.SchemeBtn = QPushButton('Show scheme')
-		#self.SchemeBtn.clicked.connect(self.ShowScheme)
-		#self.OutputMainframeGrid.addWidget(self.SchemeBtn, 1, 1)
-
-		self.ChannelsPerPathBtn = QPushButton('Channels per path')
-		self.ChannelsPerPathBtn.clicked.connect(self.ChannelsPerPath) # Process and return the Cpp matrix
-		self.ChannelsPerPathBtn.clicked.connect(self.ShowCppMatrix) # Shows the Cpp matrix
-		self.OutputMainframeGrid.addWidget(self.ChannelsPerPathBtn, 2, 1)
-
-		self.OutputMainframe.setLayout(self.OutputMainframeGrid)
-		self.OutputMainframe.setWindowTitle('Output window')
-		self.OutputMainframe.setGeometry(100, 100, 200, 200)
-		self.OutputMainframe.exec_()
-	'''
 
 	def ShowCppMatrix(self):
 		self.OutputCpp = QDialog()
@@ -170,16 +125,9 @@ class Interface(QTabWidget):
 					source = i
 					destiny = j
 					self.UpdatesGraph(source)
-					#print(self.CppMatrix)
-					#print(self.ChannelsMatrix)
-					print('{0} to {1}'.format(self.letters[i], self.letters[j]))
-					print(self.Graph)
-					# primeira coisa é ver se tem vizinhança direta. se sim, a matriz de canais ja recebe os canais do trecho direto
-					# se n tiver vizinhança direta ve o pai e dps ve os nos do pai e nos caminhos achados vai colocando os canais
 					while destiny != source:
 						if self.Graph[destiny][1].count(source) == 0:
-							# Colocar no caminho do pai
-								father = self.Graph[destiny][3] # pai do destino
+								father = self.Graph[destiny][3]
 								self.CppMatrix[father][destiny] += self.ChannelsMatrix[i][j]
 								destiny = father
 								continue
@@ -191,9 +139,7 @@ class Interface(QTabWidget):
 							self.CppMatrix[source][destiny] += self.ChannelsMatrix[i][j]
 							break  
 				else:
-					pass
-		print(self.CppMatrix)
-				
+					pass				
 
 	def UpdateValues(self):
 		if self.btnOk.isChecked() or not(self.btnOk.isChecked()):
@@ -201,8 +147,6 @@ class Interface(QTabWidget):
 			self.nxn_bfr = self.nxn
 			self.AmountOfCentrals = self.amountCentralsSpinBox.value()
 			self.nxn = self.AmountOfCentrals
-			
-			#self.UpdateLabel.setText('Sucessfuly updated')
 
 			# Distances and channels matrix updates if the number of stations has been changed
 			if self.nxn == self.nxn_bfr:
@@ -236,7 +180,6 @@ class Interface(QTabWidget):
 			self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, initial father station undefined]	
 
 	def UpdatesGraph(self, source):
-		#print('UPDATES GRAPH')
 		self.Graph = []
 		for v in range(0, self.nxn): # Reinitialization
 			self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, initial father station undefined]
@@ -244,7 +187,6 @@ class Interface(QTabWidget):
 			for j in range(0, self.nxn):
 				if self.DistMatrix[i][j] != 0:
 					self.Graph[i][1].append(j) # Defines neighborhood
-		#print(self.Graph)
 		self.BSF(source)
 
 	# Algorithm for horizontal search
@@ -307,8 +249,7 @@ class Interface(QTabWidget):
 						pass
 		self.Graph = []
 		for v in range(0, self.nxn):
-			self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, initial father station undefined]
-		#print(self.ChannelsMatrix)	
+			self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, initial father station undefined]	
 
 	def ShowChannelsMatrix(self):
 		self.ChannelsMatrixDialog = QDialog()
