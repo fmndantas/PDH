@@ -27,8 +27,15 @@ class Interface(QTabWidget):
 		self.CppMatrix = np.zeros_like(self.DistMatrix)
 		self.LPsMatrix = np.empty((self.nxn, self.nxn))
 
-		# Initializes graph for path finding
+		# Initializes graph for path finding and power array 
 		self.Graph = []
+		self.Prx = []
+
+		# Prices
+		self.RadioPrice = 80000
+		self.AnthennaPrice = 4000
+		self.ModemPrice = 4000
+		self.FiberPrice = 15000
 
 		# Tab try
 		self.InputWindow = QWidget()
@@ -89,6 +96,10 @@ class Interface(QTabWidget):
 		self.ChannelsPerPathBtn.clicked.connect(self.ChannelsPerPath) # Process and return the Cpp matrix
 		self.ChannelsPerPathBtn.clicked.connect(self.ShowCppMatrix) # Shows the Cpp matrix
 		self.layoutOut.addWidget(self.ChannelsPerPathBtn, 2, 1)
+
+		self.OForRadioBtn = QPushButton('Transmission medium')
+		self.OForRadioBtn.clicked.connect(self.OForRadio)
+		self.layoutOut.addWidget(self.OForRadioBtn, 3, 1)
 
 		self.setTabText(1, "Output window")
 		self.OutputWindow.setLayout(self.layoutOut)
@@ -156,7 +167,9 @@ class Interface(QTabWidget):
 				self.ChannelsMatrix = np.zeros((self.nxn, self.nxn))
 				self.CppMatrix = np.zeros((self.nxn, self.nxn))
 				self.Graph = [] # Graph reinitialization
+
 				for v in range(0, self.nxn):
+					
 					self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, father station]
 
 	def UpdateDistMatrix(self):
@@ -174,9 +187,11 @@ class Interface(QTabWidget):
 				if i > j:
 					self.DistMatrix[i][j] = self.DistMatrix[j][i]
 				else:
+					
 					pass
 		self.Graph = []
 		for v in range(0, self.nxn):
+			
 			self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, initial father station undefined]	
 
 	def UpdatesGraph(self, source):
@@ -246,9 +261,11 @@ class Interface(QTabWidget):
 						self.tempWidget = self.gridItem.widget()
 						self.ChannelsMatrix[i-2][j-2] = self.tempWidget.text()
 					else:
+						
 						pass
 		self.Graph = []
 		for v in range(0, self.nxn):
+			
 			self.Graph.append([v, [], 'u', 'u']) # [station, neighborhood, initial color undefined, initial father station undefined]	
 
 	def ShowChannelsMatrix(self):
@@ -279,19 +296,49 @@ class Interface(QTabWidget):
 
 	# This function is responsible for select the best medium of transmission
 	# Returns (Radio, Optical fiber without repeater)
-	def OForRadio(self):
+	def OForRadio(self): # Shows pathies with distances, Prx for each path and viability
 		# Standart free space loss for all pathies
-		self.Aobs = 5
+
+		# If the path supports Radio, then the costs will be calculated and compared. Else, optical transmission will be used. 
+		self.OForRadioDialog = QDialog()
+		self.OForRadioDialog.setWindowTitle("Transmission medium info")
+		self.OForRadioDialogGrid = QGridLayout()
+		
+		self.Aobs = 8 # Standart obstacle loss for all pathies
+		self.Prx = []
+
+		# Prx array computation
+		
 		for i in range(0, self.DistMatrix.shape[0]-1):
 			for j in range(1, self.DistMatrix.shape[1]):
-				if j > i and self.DistMatrix[i][j] != 0:
-					self.Prx = 31.5 - 20*np.log10(self.FreqOp) - 20*np.log10(DistMatrix[i][j]) 
-					if self.DistMatrix[i][j] <= 100 and self.Prx > -80:
-						return (True, self.Prx, True)
-					elif self.DistMatrix[i][j] > 100 and self.Prx > -80:
-						return (True, self.Prx, False)
-					else: 
-						return (False, self.Prx, False)
+				if (j > i and self.DistMatrix[i][j] != 0):
+					Prx = 40 + 12 + 12 - (31.5 + 20*np.log10(int(self.FreqOp)) + 20*np.log10(int(self.DistMatrix[i][j])) + self.Aobs)
+					WhichOne = 'Both' if Prx > -80 else 'Optical fiber'
+					print(self.DistMatrix[i][j])
+					self.Prx.append([self.letters[i], self.letters[j], Prx, WhichOne]) 
+		
+		print(self.Prx)
+		# Shows the results
+		vertical_placment = 1
+		for path in self.Prx:
+			Source = path[0]
+			Destiny = path[1]
+			Prx = "{0:.2f}".format(path[2])
+			WhichOne = path[3]
+			Distance = self.DistMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
+			AmountOfChannels = self.CppMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
+			AmountOfDoubleJumpers = round(round(AmountOfChannels/30)/16)
+			RadioPrice = AmountOfDoubleJumpers*(2*self.RadioPrice + 2*self.AnthennaPrice)
+			OpticalPrice = AmountOfDoubleJumpers*(2*self.ModemPrice + Distance*self.FiberPrice)
+
+			self.OForRadioDialogGrid.addWidget(QLabel('{0} to {1} >>> Distance = {2} km | Prx = {3} dBm | OF or Radio: (technical viability) = {4}{5} '
+													  .format(Source, Destiny, Distance , Prx, WhichOne, 
+													  '' if WhichOne == 'Optical fiber' else (", (financial viability) = Radio" if RadioPrice < OpticalPrice else ", (financial viability) = Fiber"))), vertical_placment, 1)
+			vertical_placment += 1
+
+		self.OForRadioDialog.setLayout(self.OForRadioDialogGrid)
+		self.OForRadioDialog.setGeometry(100, 100, 200, 200)
+		self.OForRadioDialog.exec_()
 
 def main():
 	app = QApplication(sys.argv)
