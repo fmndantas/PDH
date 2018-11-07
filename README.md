@@ -1,4 +1,4 @@
-# PHD
+# PDH
 
 By: @fmndantas
 
