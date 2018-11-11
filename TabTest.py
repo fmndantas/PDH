@@ -5,7 +5,6 @@ from PyQt5.QtCore import *
 import numpy as np
 from time import sleep
 
-
 class Interface(QTabWidget):
     def __init__(self, parent=None):
         super(Interface, self).__init__(parent)
@@ -105,6 +104,10 @@ class Interface(QTabWidget):
         self.OForRadioBtn = QPushButton('Transmission medium')
         self.OForRadioBtn.clicked.connect(self.OForRadio)
         self.layoutOut.addWidget(self.OForRadioBtn, 3, 1)
+
+        self.BudgetBtn = QPushButton('Budget window')
+        self.BudgetBtn.clicked.connect(self.Budget)
+        self.layoutOut.addWidget(self.BudgetBtn, 4, 1)
 
         self.setTabText(1, "Output window")
         self.OutputWindow.setLayout(self.layoutOut)
@@ -399,6 +402,40 @@ class Interface(QTabWidget):
         self.OForRadioDialog.setLayout(self.OForRadioDialogGrid)
         self.OForRadioDialog.setGeometry(100, 100, 200, 200)
         self.OForRadioDialog.exec_()
+
+    def Budget(self):
+        self.BudgetUI = QDialog()
+        self.BudgetUI.setWindowTitle('Budget UI')
+
+        self.BudgetLayout = QVBoxLayout()
+
+        self.BudgetTable()
+
+        self.BudgetLayout.addWidget(self.BudgetTableW)
+        self.BudgetUI.setLayout(self.BudgetLayout)
+
+        self.BudgetUI.setGeometry(50, 50, 500, 500)
+        self.BudgetUI.exec_()
+
+    def BudgetTable(self):
+        self.BudgetTableW = QTableWidget()
+        self.BudgetTableW.setRowCount(self.nxn+5)
+        self.BudgetTableW.setColumnCount(6)
+
+        for i in range(0, self.nxn):
+            self.BudgetTableW.setItem(i+1, 0, QTableWidgetItem('Estação {0}'.format(self.letters[i])))
+
+        self.BudgetTableW.setItem(self.nxn + 1, 0, QTableWidgetItem('Qtd. Total'))
+        self.BudgetTableW.setItem(self.nxn + 2, 0, QTableWidgetItem('Preço unitário (R$)'))
+        self.BudgetTableW.setItem(self.nxn + 3, 0, QTableWidgetItem('Sub-total (R$)'))
+        self.BudgetTableW.setItem(self.nxn + 4, 0, QTableWidgetItem('Total'))
+
+        landscape_labels = ['PCM 30 (qtd.)', 'Duplo salto', 'Radio 480 canais (qtd.)',
+                            'Antena SHF (qtd.)', 'Modem óptico (qtd)']
+
+        for j in range(1, 5):
+            self.BudgetTableW.setItem(0, j, QTableWidgetItem(landscape_labels[j]))
+
 
 def main():
     app = QApplication(sys.argv)
