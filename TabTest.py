@@ -7,6 +7,7 @@ import numpy as np
 class Interface(QTabWidget):
     def __init__(self, parent=None):
         super(Interface, self).__init__(parent)
+
         self.letters = "ABCDEFGHIJ"
 
         # Operation frequency of transceptors in KHz and amount of centrals
@@ -21,11 +22,11 @@ class Interface(QTabWidget):
 
         # Initializes graph for path finding and power array
         self.Graph = []
-        self.Prx = []
+        self.PowerReceptionArray = []
 
         # Default prices
         self.PCMPrice = 5000
-        self.DoubleSalt = 8000
+        self.DoubleSaltPrice = 8000
         self.RadioPrice = 80000
         self.AnthennaPrice = 5000
         self.ModemPrice = 4000
@@ -100,7 +101,7 @@ class Interface(QTabWidget):
         self.BudgetBtn = QPushButton('Budget window')
         self.BudgetBtn.clicked.connect(self.ChannelsPerPath)
         self.BudgetBtn.clicked.connect(self.of_or_radio)
-        print('ok')
+        # print('ok')
         self.BudgetBtn.clicked.connect(self.Budget)
         self.layoutOut.addWidget(self.BudgetBtn, 4, 1)
 
@@ -115,8 +116,8 @@ class Interface(QTabWidget):
 
         self.PCM_le = QLineEdit()
         self.PCM_le.setText(str(self.PCMPrice))
-        self.DoubleSalt_le = QLineEdit()
-        self.DoubleSalt_le.setText(str(self.DoubleSalt))
+        self.DoubleSaltPrice_le = QLineEdit()
+        self.DoubleSaltPrice_le.setText(str(self.DoubleSaltPrice))
         self.Radio_le = QLineEdit()
         self.Radio_le.setText(str(self.RadioPrice))
         self.Anthenna_le = QLineEdit()
@@ -127,7 +128,7 @@ class Interface(QTabWidget):
         self.Fiber_le.setText(str(self.FiberPrice))
 
         self.flo.addRow('PCM - R$', self.PCM_le)
-        self.flo.addRow('Double salt - R$', self.DoubleSalt_le)
+        self.flo.addRow('Double salt - R$', self.DoubleSaltPrice_le)
         self.flo.addRow('Radio - R$', self.Radio_le)
         self.flo.addRow('Anthenna - R$', self.Anthenna_le)
         self.flo.addRow('Modem - R$', self.Modem_le)
@@ -148,7 +149,7 @@ class Interface(QTabWidget):
     def UpdatePrices(self):
         self.AnthennaPrice = int(self.Anthenna_le.text())
         self.PCMPrice = int(self.PCM_le.text())
-        self.DoubleSalt = int(self.DoubleSalt_le.text())
+        self.DoubleSaltPrice = int(self.DoubleSaltPrice_le.text())
         self.RadioPrice = int(self.Radio_le.text())
         self.ModemPrice = int(self.Modem_le.text())
         self.FiberPrice = int(self.Fiber_le.text())
@@ -376,7 +377,7 @@ class Interface(QTabWidget):
         self.ChannelsPerPath()
 
         self.Aobs = 8  # Standard obstacle loss for all paths in dB
-        self.Prx = []
+        self.PowerReceptionArray = []
 
         # Prx array computation
         for i in range(0, self.DistMatrix.shape[0] - 1):
@@ -385,25 +386,25 @@ class Interface(QTabWidget):
                     Prx = 40 + 12 + 12 - (31.5 + 20 * np.log10(int(self.FreqOp)) + 20 * np.log10(
                         int(self.DistMatrix[i][j])) + self.Aobs)
                     WhichOne = 'Both' if Prx > -80 else 'Fiber'
-                    self.Prx.append([self.letters[i], self.letters[j], Prx, WhichOne, '', ''])
+                    self.PowerReceptionArray.append([self.letters[i], self.letters[j], Prx, WhichOne, '', ''])
 
-        print('funfo essa maldicao')
+        # print('funfo essa maldicao')
 
-        for path in self.Prx:
+        for path in self.PowerReceptionArray:
             Source = path[0]
             Destiny = path[1]
             Distance = self.DistMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
             path[4] = self.ChannelsPerPathMatrix[self.letters.index(Source)][self.letters.index(Destiny)] # Amount of channels update
-            print('isso aqui deve ser 930 >>>', path[4])
+            # print('isso aqui deve ser 930 >>>', path[4])
             path[5] = 2 * path[4] // 30 // 16 # Amount of double jumpers
             RadioPrice = path[5] * (self.RadioPrice + self.AnthennaPrice)
             OpticalPrice = path[5] * (self.ModemPrice + (Distance * self.FiberPrice)/2)
             path[3] = 'Fiber' if path[3] == 'Fiber' else 'Radio' if RadioPrice < OpticalPrice else 'Fiber'
 
-        print(self.Prx)
+        # print(self.PowerReceptionArray)
 
     def of_or_radio_display(self):
-        """Shows paths with distances, Prx for each path and viability"""
+        """Shows paths with distances, reception power for each path and viability"""
 
         # Standard free space loss for all paths
 
@@ -416,7 +417,7 @@ class Interface(QTabWidget):
         # Shows the results
 
         vertical_placment = 1
-        for path in self.Prx:
+        for path in self.PowerReceptionArray:
             Source = path[0]
             Destiny = path[1]
             Prx = "{0:.2f}".format(path[2])
@@ -441,11 +442,12 @@ class Interface(QTabWidget):
 
         self.BudgetLayout.addWidget(self.BudgetTableW)
         self.BudgetUI.setLayout(self.BudgetLayout)
-
-        self.BudgetUI.setGeometry(50, 50, 500, 500)
+        self.BudgetUI.showFullScreen()
+        # self.BudgetUI.setGeometry(50, 50, 500, 500)
         self.BudgetUI.exec_()
 
     def BudgetTable(self):
+
         self.BudgetTableW = QTableWidget()
         self.BudgetTableW.setRowCount(self.size + 5)
         self.BudgetTableW.setColumnCount(5)
@@ -468,41 +470,94 @@ class Interface(QTabWidget):
         for j in range(1, 5):
             self.BudgetTableW.setItem(0, j, QTableWidgetItem(landscape_labels[j]))
 
-        # Get data from self.Prx -> OK!
-        print(self.Prx)
-
         self.Stations = list()
         for i in range(0, self.size):
             self.Stations.append([self.letters[i], 0, 0, 0, 0, 0])
 
+            """
+            --------------------------------------------------------------------
+            the structure is of self.Station is
+                             [0 - name, 1 - total_channels , 2 - double_jumpers, 
+                              3 - radio, 4 - anthenna, 5 - modem] 
+            --------------------------------------------------------------------
+            """
+
         # Per station elements finder
         for i in range(0, self.size):
             transmission_medium = list()
-            for path in self.Prx:
+            for path in self.PowerReceptionArray:
                 if path[0] == self.letters[i] or path[1] == self.letters[i]:
-                    print('dento do if')
+                    # print('dento do if')
                     self.Stations[i][1] += path[4] # Canais
                     transmission_medium.append(path[3])
                 else:
                     pass
             self.Stations[i][2] = round(round(self.Stations[i][1]/30)/16) # Total de duplos saltos
             for medium in transmission_medium:
-                # self.Stations[i][3] += 1 if medium == 'Radio' else None
                 if medium == 'Radio':
-                    self.Stations[i][3] += 1
+                    self.Stations[i][3] += 1 # Medium
                 else:
                     pass
-            # print('mediummm')
+
             self.Stations[i][4] = self.Stations[i][3]
             self.Stations[i][5] = self.Stations[i][2] - self.Stations[i][4]
-            # print('resto')
 
-        # print(self.Stations)
+
+        self.equipment_subtotals = [0, 0, 0, 0]
+        """
+        -------------------------------------------------------------------
+        the structure is of self.equipment_subtotals is
+                             [0 - double jumpers, 1 - radio , 2 - anthenna, 
+                              3 - modem]
+        -------------------------------------------------------------------
+        """
+
+        # equipment subtotals
+        for station in self.Stations:
+            self.equipment_subtotals[0] += station[2] # Double jumbers
+            self.equipment_subtotals[1] += station[3] # Radio
+            self.equipment_subtotals[2] += station[4] # Anthenna
+            self.equipment_subtotals[3] += station[5] # Modem
+        # print(self.equipment_subtotals)
+        # price subtotals
+        self.prices_subtotals = self.equipment_subtotals.copy()
+        self.prices_subtotals[0] *= self.DoubleSaltPrice
+        self.prices_subtotals[1] *= self.RadioPrice
+        self.prices_subtotals[2] *= self.AnthennaPrice
+        self.prices_subtotals[3] *= self.ModemPrice
+
+        # price total
+        self.price_total = sum(self.prices_subtotals)
+        # print('Ate aqui ok')
 
         for table_line in range(0, self.size):
             for table_column in range(0, 4):
                 self.BudgetTableW.setItem(table_line + 1, table_column + 1,
-                                          QTableWidgetItem('{0}'.format(self.Stations[table_line][table_column+2])))
+                                          QTableWidgetItem('{0:.0f}'.format(self.Stations[table_line][table_column+2])))
+
+        # Mostra dados para a linha "Qtd. total"
+        for table_column in range(0, 4):
+            self.BudgetTableW.setItem(self.size + 1, table_column + 1,
+                                      QTableWidgetItem(str('{0:.0f}'.format(self.equipment_subtotals[table_column]))))
+
+        # Mostra dados para a linha "Preço unitário"
+        self.BudgetTableW.setItem(self.size + 2, 1, QTableWidgetItem(str('{0:.2f}'.format(self.DoubleSaltPrice))))
+        self.BudgetTableW.setItem(self.size + 2, 2, QTableWidgetItem(str('{0:.2f}'.format(self.RadioPrice))))
+        self.BudgetTableW.setItem(self.size + 2, 3, QTableWidgetItem(str('{0:.2f}'.format(self.AnthennaPrice))))
+        self.BudgetTableW.setItem(self.size + 2, 4, QTableWidgetItem(str('{0:.2f}'.format(self.ModemPrice))))
+
+        # Mostra dados para a linha "Sub-total"
+        for table_column in range(0, 4):
+            self.BudgetTableW.setItem(self.size + 3, table_column + 1,
+                                      QTableWidgetItem(str('{0:.2f}'.format(self.prices_subtotals[table_column]))))
+
+        # Mostra dados para a linha "Total"
+        # for table_column in range(0, 4):
+        self.BudgetTableW.setItem(self.size + 4, 1, QTableWidgetItem(str('{0:.2f}'.format(self.price_total))))
+
+        # print('demonio')
+
+
 
 
 def main():
