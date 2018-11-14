@@ -5,12 +5,13 @@ from PyQt5.QtCore import *
 import numpy as np
 from time import sleep
 
+
 class Interface(QTabWidget):
     def __init__(self, parent=None):
         super(Interface, self).__init__(parent)
 
         # Flag for first update
-        self.firstUpdateFlag = False
+        self.firstUpdateFlag = False # Unused, I think
 
         # Letters
         self.letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J']
@@ -103,9 +104,13 @@ class Interface(QTabWidget):
 
         self.OForRadioBtn = QPushButton('Transmission medium')
         self.OForRadioBtn.clicked.connect(self.OForRadio)
+        self.OForRadioBtn.clicked.connect(self.OForRadioDisplay)
         self.layoutOut.addWidget(self.OForRadioBtn, 3, 1)
 
         self.BudgetBtn = QPushButton('Budget window')
+        self.BudgetBtn.clicked.connect(self.ChannelsPerPath)
+        self.BudgetBtn.clicked.connect(self.OForRadio)
+        print('ok')
         self.BudgetBtn.clicked.connect(self.Budget)
         self.layoutOut.addWidget(self.BudgetBtn, 4, 1)
 
@@ -172,7 +177,7 @@ class Interface(QTabWidget):
                     self.Cpplayout.addWidget(QLabel(
                         '{0} to {1}: {2} channels'.format(self.letters[source - 2], self.letters[destiny - 2],
                                                           '{0:.0f}'.format(self.CppMatrix[source - 2][destiny - 2]))),
-                                             vertical_placment, 1)
+                        vertical_placment, 1)
                     vertical_placment += 1
 
         self.OutputCpp.setLayout(self.Cpplayout)
@@ -319,7 +324,6 @@ class Interface(QTabWidget):
                         self.tempWidget = self.gridItem.widget()
                         self.ChannelsMatrix[i - 2][j - 2] = self.tempWidget.text()
                     else:
-
                         pass
         self.Graph = []
         for v in range(0, self.nxn):
@@ -359,37 +363,47 @@ class Interface(QTabWidget):
 
         # If the path supports Radio, then the costs will be calculated and compared. Else, optical transmission will
         #  be used.
-        self.OForRadioDialog = QDialog()
-        self.OForRadioDialog.setWindowTitle("Transmission medium info")
-        self.OForRadioDialogGrid = QGridLayout()
 
-        self.Aobs = 8  # Standart obstacle loss for all pathies in dB
+        #self.OForRadioDialog = QDialog()
+        #self.OForRadioDialog.setWindowTitle("Transmission medium info")
+        #self.OForRadioDialogGrid = QGridLayout()
+
+        # Updates
+        self.UpdateDistMatrix()
+        self.UpdateChannelsMatrix()
+        self.ChannelsPerPath()
+
+        self.Aobs = 8  # Standard obstacle loss for all paths in dB
         self.Prx = []
 
         # Prx array computation
-
         for i in range(0, self.DistMatrix.shape[0] - 1):
             for j in range(1, self.DistMatrix.shape[1]):
                 if j > i and self.DistMatrix[i][j] != 0:
                     Prx = 40 + 12 + 12 - (31.5 + 20 * np.log10(int(self.FreqOp)) + 20 * np.log10(
                         int(self.DistMatrix[i][j])) + self.Aobs)
                     WhichOne = 'Both' if Prx > -80 else 'Fiber'
-                    self.Prx.append([self.letters[i], self.letters[j], Prx, WhichOne, int(), int()])
-
+                    self.Prx.append([self.letters[i], self.letters[j], Prx, WhichOne, '', ''])
+        print('funfo essa maldicao')
         # Shows the results
-        vertical_placment = 1
+        # vertical_placment = 1
         for path in self.Prx:
             Source = path[0]
             Destiny = path[1]
-            Prx = "{0:.2f}".format(path[2])
-            WhichOne = path[3]
+            #Prx = "{0:.2f}".format(path[2])
+            #WhichOne = path[3]
             Distance = self.DistMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
-            AmountOfChannels = self.CppMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
-            path[4] = AmountOfChannels
-            AmountOfDoubleJumpers = round(round(AmountOfChannels/30)/16)
-            path[5] = AmountOfDoubleJumpers
-            RadioPrice = AmountOfDoubleJumpers * (2 * self.RadioPrice + 2 * self.AnthennaPrice)
-            OpticalPrice = AmountOfDoubleJumpers * (2 * self.ModemPrice + Distance * self.FiberPrice)
+            #AmountOfChannels = self.CppMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
+            path[4] = self.CppMatrix[self.letters.index(Source)][self.letters.index(Destiny)] # Amount of channels update
+            print('isso aqui deve ser 930 >>>', path[4])
+            path[5] = 2*round(round(path[4]/30)/16) # Amount of double jumpers
+            RadioPrice = path[5] * (self.RadioPrice + self.AnthennaPrice)
+            OpticalPrice = path[5] * (self.ModemPrice + (Distance * self.FiberPrice)/2)
+            path[3] = 'Fiber' if path[3] == 'Fiber' else 'Radio' if RadioPrice < OpticalPrice else 'Fiber'
+
+        print(self.Prx)
+
+        '''
             self.OForRadioDialogGrid.addWidget(
                 QLabel('{0} to {1} >>> Distance = {2} km | Prx = {3} dBm | OF or Radio: (technical viability) = {4}{5} '
                        .format(Source, Destiny, Distance, Prx, WhichOne,
@@ -397,6 +411,50 @@ class Interface(QTabWidget):
                                    ", (financial viability) = Radio" if RadioPrice < OpticalPrice
                                    else ", (financial viability) = Fiber"))), vertical_placment, 1)
             path[3] = 'Fiber' if WhichOne == 'Fiber' else 'Radio' if RadioPrice < OpticalPrice else 'Fiber'
+            vertical_placment += 1
+
+        #self.OForRadioDialog.setLayout(self.OForRadioDialogGrid)
+        #self.OForRadioDialog.setGeometry(100, 100, 200, 200)
+        #self.OForRadioDialog.exec_()
+        '''
+
+    def OForRadioDisplay(self):  # Shows paths with distances, Prx for each path and viability
+        # Standard free space loss for all paths
+
+        # If the path supports Radio, then the costs will be calculated and compared. Else, optical transmission will
+        #  be used.
+        self.OForRadioDialog = QDialog()
+        self.OForRadioDialog.setWindowTitle("Transmission medium info")
+        self.OForRadioDialogGrid = QGridLayout()
+
+        #self.Aobs = 8  # Standard obstacle loss for all paths in dB
+        #self.Prx = []
+
+        # Prx array computation
+        '''
+        for i in range(0, self.DistMatrix.shape[0] - 1):
+            for j in range(1, self.DistMatrix.shape[1]):
+                if j > i and self.DistMatrix[i][j] != 0:
+                    Prx = 40 + 12 + 12 - (31.5 + 20 * np.log10(int(self.FreqOp)) + 20 * np.log10(
+                        int(self.DistMatrix[i][j])) + self.Aobs)
+                    WhichOne = 'Both' if Prx > -80 else 'Fiber'
+                    self.Prx.append([self.letters[i], self.letters[j], Prx, WhichOne, int(), int()])
+        '''
+        # Shows the results
+
+        vertical_placment = 1
+        for path in self.Prx:
+            Source = path[0]
+            Destiny = path[1]
+            Prx = "{0:.2f}".format(path[2])
+            WhichOne = path[3]
+            Distance = self.DistMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
+            #AmountOfChannels = self.CppMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
+            #AmountOfChannels = path[4]
+            #AmountOfDoubleJumpers = path[5]
+            self.OForRadioDialogGrid.addWidget(
+                QLabel('{0} to {1} >>> Distance = {2} km | Prx = {3} dBm | OF or Radio: {4}'
+                       .format(Source, Destiny, Distance, Prx, WhichOne)), vertical_placment, 1)
             vertical_placment += 1
 
         self.OForRadioDialog.setLayout(self.OForRadioDialogGrid)
@@ -414,16 +472,20 @@ class Interface(QTabWidget):
         self.BudgetLayout.addWidget(self.BudgetTableW)
         self.BudgetUI.setLayout(self.BudgetLayout)
 
+        # print(self.Prx)
+        # PRX contains information about the amount of channels per path.
+        # However, I'll use the DistMatrix to make de financial budget
+
         self.BudgetUI.setGeometry(50, 50, 500, 500)
         self.BudgetUI.exec_()
 
     def BudgetTable(self):
         self.BudgetTableW = QTableWidget()
-        self.BudgetTableW.setRowCount(self.nxn+5)
-        self.BudgetTableW.setColumnCount(6)
+        self.BudgetTableW.setRowCount(self.nxn + 5)
+        self.BudgetTableW.setColumnCount(5)
 
         for i in range(0, self.nxn):
-            self.BudgetTableW.setItem(i+1, 0, QTableWidgetItem('Estação {0}'.format(self.letters[i])))
+            self.BudgetTableW.setItem(i + 1, 0, QTableWidgetItem('Estação {0}'.format(self.letters[i])))
 
         self.BudgetTableW.setItem(self.nxn + 1, 0, QTableWidgetItem('Qtd. Total'))
         self.BudgetTableW.setItem(self.nxn + 2, 0, QTableWidgetItem('Preço unitário (R$)'))
@@ -433,8 +495,55 @@ class Interface(QTabWidget):
         landscape_labels = ['PCM 30 (qtd.)', 'Duplo salto', 'Radio 480 canais (qtd.)',
                             'Antena SHF (qtd.)', 'Modem óptico (qtd)']
 
+        column_width = 150
+        for i in range(0, 5):
+            self.BudgetTableW.setColumnWidth(i, column_width)
+
         for j in range(1, 5):
             self.BudgetTableW.setItem(0, j, QTableWidgetItem(landscape_labels[j]))
+
+        # Get data from self.Prx -> OK!
+        print(self.Prx)
+
+        self.Stations = list()
+        for i in range(0, self.nxn):
+            # self.Stations.append([self.letters[i], 'Total de canais', 'Duplo salto',
+                                  # 'Radio 480 canais', 'Antena SHF', 'Modem óptico'])
+            self.Stations.append([self.letters[i], 0, 0, 0, 0, 0])
+
+        #print(self.Prx)
+        # Per station elements finder
+        for i in range(0, self.nxn):
+            transmission_medium = list()
+            for path in self.Prx:
+                if path[0] == self.letters[i] or path[1] == self.letters[i]:
+                    print('dento do if nessa pota q partiu')
+                    self.Stations[i][1] += path[4] # Canais
+                    transmission_medium.append(path[3])
+                else:
+                    pass
+            # print(self.Stations)
+            self.Stations[i][2] = round(round(self.Stations[i][1]/30)/16) # Total de duplos saltos
+            # print('rounddddddd')
+            for medium in transmission_medium:
+                # self.Stations[i][3] += 1 if medium == 'Radio' else None
+                if medium == 'Radio':
+                    self.Stations[i][3] += 1
+                else:
+                    pass
+            # print('mediummm')
+            self.Stations[i][4] = self.Stations[i][3]
+            self.Stations[i][5] = self.Stations[i][2] - self.Stations[i][4]
+            # print('resto')
+
+        # print(self.Stations)
+
+        for table_line in range(0, self.nxn):
+            for table_column in range(0, 4):
+                self.BudgetTableW.setItem(table_line + 1, table_column + 1,
+                                          QTableWidgetItem('{0}'.format(self.Stations[table_line][table_column+2])))
+
+        # self.Subtotals =
 
 
 def main():
