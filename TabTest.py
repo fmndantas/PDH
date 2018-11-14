@@ -517,7 +517,7 @@ class Interface(QTabWidget):
             transmission_medium = list()
             for path in self.Prx:
                 if path[0] == self.letters[i] or path[1] == self.letters[i]:
-                    print('dento do if nessa pota q partiu')
+                    print('dento do if')
                     self.Stations[i][1] += path[4] # Canais
                     transmission_medium.append(path[3])
                 else:
