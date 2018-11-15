@@ -443,7 +443,6 @@ class Interface(QTabWidget):
         self.BudgetLayout.addWidget(self.BudgetTableW)
         self.BudgetUI.setLayout(self.BudgetLayout)
         self.BudgetUI.showFullScreen()
-        # self.BudgetUI.setGeometry(50, 50, 500, 500)
         self.BudgetUI.exec_()
 
     def BudgetTable(self):
@@ -518,7 +517,7 @@ class Interface(QTabWidget):
             self.equipment_subtotals[1] += station[3] # Radio
             self.equipment_subtotals[2] += station[4] # Anthenna
             self.equipment_subtotals[3] += station[5] # Modem
-        # print(self.equipment_subtotals)
+
         # price subtotals
         self.prices_subtotals = self.equipment_subtotals.copy()
         self.prices_subtotals[0] *= self.DoubleSaltPrice
@@ -528,7 +527,6 @@ class Interface(QTabWidget):
 
         # price total
         self.price_total = sum(self.prices_subtotals)
-        # print('Ate aqui ok')
 
         for table_line in range(0, self.size):
             for table_column in range(0, 4):
@@ -554,10 +552,6 @@ class Interface(QTabWidget):
         # Mostra dados para a linha "Total"
         # for table_column in range(0, 4):
         self.BudgetTableW.setItem(self.size + 4, 1, QTableWidgetItem(str('{0:.2f}'.format(self.price_total))))
-
-        # print('demonio')
-
-
 
 
 def main():
