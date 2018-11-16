@@ -10,8 +10,8 @@ If you have a working version of `git` on your system you can simply clone this 
 
 or download the ZIP file clicking the green button above.
 
-If you're using any Windows OS, there's an `.exe` file inside the 
-directory `/distros/windows/final_executable/dist/PDH.exe`.
+If you're using any Windows OS, the final `.exe` file will be encountered inside the directory
+```/distros/windows/final_executable/dist/PDH.exe```
 
 ## Dependencies
 
@@ -75,3 +75,9 @@ Lastly, in the "Budget window" one can see the summary of every
 component need for the design and their associated costs.
 
 ![shot7](https://github.com/fmndantas/PDH/blob/master/screenshots/shot7.png?raw=True "Title")
+
+## Futures updates
+
+* The TL (transmission lines) will be considered
+* For now, the obstacle loss per path is not editable and is fixed in 8 dB. The change in those parameters will be considered in future updates.
+* The budget screen will have a nicely desing :)
