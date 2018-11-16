@@ -30,7 +30,7 @@ class Interface(QTabWidget):
         self.RadioPrice = 80000
         self.AnthennaPrice = 5000
         self.ModemPrice = 4000
-        self.FiberPrice = 15000
+        self.FiberPrice = 15000 # Per km
 
         self.InputWindow = QWidget()
         self.OutputWindow = QWidget()
@@ -334,8 +334,9 @@ class Interface(QTabWidget):
                         pass
         self.Graph = []
         for v in range(0, self.size):
-            self.Graph.append([v, [], 'u',
-                               'u'])  # [station, neighborhood, initial color undefined, initial father station undefined]
+            self.Graph.append([v, [], 'u', 'u'])
+
+        """data structure: [station, neighborhood, initial color undefined, initial father station undefined]"""
 
     def ShowChannelsMatrix(self):
         self.ChannelsMatrixDialog = QDialog()
@@ -388,23 +389,18 @@ class Interface(QTabWidget):
                     WhichOne = 'Both' if Prx > -80 else 'Fiber'
                     self.PowerReceptionArray.append([self.letters[i], self.letters[j], Prx, WhichOne, '', ''])
 
-        # print('funfo essa maldicao')
-
         for path in self.PowerReceptionArray:
             Source = path[0]
             Destiny = path[1]
             Distance = self.DistMatrix[self.letters.index(Source)][self.letters.index(Destiny)]
             path[4] = self.ChannelsPerPathMatrix[self.letters.index(Source)][self.letters.index(Destiny)] # Amount of channels update
-            # print('isso aqui deve ser 930 >>>', path[4])
             path[5] = 2 * path[4] // 30 // 16 # Amount of double jumpers
             RadioPrice = path[5] * (self.RadioPrice + self.AnthennaPrice)
             OpticalPrice = path[5] * (self.ModemPrice + (Distance * self.FiberPrice)/2)
             path[3] = 'Fiber' if path[3] == 'Fiber' else 'Radio' if RadioPrice < OpticalPrice else 'Fiber'
 
-        # print(self.PowerReceptionArray)
-
     def of_or_radio_display(self):
-        """Shows paths with distances, reception power for each path and viability"""
+        """ Only shows paths with distances, reception power for each path and viability"""
 
         # Standard free space loss for all paths
 
@@ -448,26 +444,8 @@ class Interface(QTabWidget):
     def BudgetTable(self):
 
         self.BudgetTableW = QTableWidget()
-        self.BudgetTableW.setRowCount(self.size + 5)
+        self.BudgetTableW.setRowCount(20)
         self.BudgetTableW.setColumnCount(5)
-
-        for i in range(0, self.size):
-            self.BudgetTableW.setItem(i + 1, 0, QTableWidgetItem('Estação {0}'.format(self.letters[i])))
-
-        self.BudgetTableW.setItem(self.size + 1, 0, QTableWidgetItem('Qtd. Total'))
-        self.BudgetTableW.setItem(self.size + 2, 0, QTableWidgetItem('Preço unitário (R$)'))
-        self.BudgetTableW.setItem(self.size + 3, 0, QTableWidgetItem('Sub-total (R$)'))
-        self.BudgetTableW.setItem(self.size + 4, 0, QTableWidgetItem('Total'))
-
-        landscape_labels = ['PCM 30 (qtd.)', 'Duplo salto', 'Radio 480 canais (qtd.)',
-                            'Antena SHF (qtd.)', 'Modem óptico (qtd)']
-
-        column_width = 150
-        for i in range(0, 5):
-            self.BudgetTableW.setColumnWidth(i, column_width)
-
-        for j in range(1, 5):
-            self.BudgetTableW.setItem(0, j, QTableWidgetItem(landscape_labels[j]))
 
         self.Stations = list()
         for i in range(0, self.size):
@@ -486,6 +464,7 @@ class Interface(QTabWidget):
             transmission_medium = list()
             for path in self.PowerReceptionArray:
                 if path[0] == self.letters[i] or path[1] == self.letters[i]:
+
                     # print('dento do if')
                     self.Stations[i][1] += path[4] # Canais
                     transmission_medium.append(path[3])
@@ -495,6 +474,7 @@ class Interface(QTabWidget):
             for medium in transmission_medium:
                 if medium == 'Radio':
                     self.Stations[i][3] += 1 # Medium
+
                 else:
                     pass
 
@@ -503,6 +483,7 @@ class Interface(QTabWidget):
 
 
         self.equipment_subtotals = [0, 0, 0, 0]
+
         """
         -------------------------------------------------------------------
         the structure is of self.equipment_subtotals is
@@ -518,6 +499,7 @@ class Interface(QTabWidget):
             self.equipment_subtotals[2] += station[4] # Anthenna
             self.equipment_subtotals[3] += station[5] # Modem
 
+
         # price subtotals
         self.prices_subtotals = self.equipment_subtotals.copy()
         self.prices_subtotals[0] *= self.DoubleSaltPrice
@@ -528,14 +510,77 @@ class Interface(QTabWidget):
         # price total
         self.price_total = sum(self.prices_subtotals)
 
+        # fiber price per path
+
+        self.fiber_price_data = []
+        """data structure: [origin, destiny], 2*Distance, self.FiberPrice, subtotal"""
+
+        for path in self.PowerReceptionArray:
+            same_node_occurrences = 0
+            print(path)
+            distance = self.DistMatrix[self.letters.index(path[0])][self.letters.index(path[1])]
+            if path[3] == 'Fiber':
+                for j in range(0, len(self.PowerReceptionArray)):
+                    same_node_occurrences += self.PowerReceptionArray[j][0].count(path[0])
+                self.fiber_price_data.append(["{0}-{1}".format(path[0], path[1]),
+                                        same_node_occurrences*distance,
+                                        self.FiberPrice,
+                                        distance*self.FiberPrice])
+            else:
+                self.fiber_price_data.append(["{0}-{1}".format(path[0], path[1]),
+                                              '-----',
+                                              self.FiberPrice,
+                                              '-----'])
+        print(self.fiber_price_data)
+
+        # Cria os labels da primeira tabela
+        for i in range(0, self.size):
+            self.BudgetTableW.setItem(i + 1, 0, QTableWidgetItem('Estação {0}'.format(self.letters[i])))
+
+        self.BudgetTableW.setItem(self.size + 1, 0, QTableWidgetItem('Qtd. Total'))
+        self.BudgetTableW.setItem(self.size + 2, 0, QTableWidgetItem('Preço unitário (R$)'))
+        self.BudgetTableW.setItem(self.size + 3, 0, QTableWidgetItem('Sub-total I (R$)'))
+        self.BudgetTableW.setItem(self.size + 4, 0, QTableWidgetItem('Total I (R$)'))
+        landscape_labels = ['PCM 30 (qtd.)', 'Duplo salto', 'Radio 480 canais (qtd.)',
+                            'Antena SHF (qtd.)', 'Modem óptico (qtd)']
+        column_width = 150
+        for i in range(0, 5):
+            self.BudgetTableW.setColumnWidth(i, column_width)
+        for j in range(1, 5):
+            self.BudgetTableW.setItem(0, j, QTableWidgetItem(landscape_labels[j]))
+
+        """ Segunda tabela (labels)  """
+        landscape_labels_2 = ['Trecho', 'kms', 'Preço por km', 'Subtotal']
+        for j in range(0, 4):
+            self.BudgetTableW.setItem(self.size + 6, j, QTableWidgetItem(landscape_labels_2[j]))
+
+        fiber_price_item = 0
+        for i in range(self.size + 7, self.size + len(self.PowerReceptionArray) + 7):
+            for j in range(0, 4):
+                self.BudgetTableW.setItem(i, j, QTableWidgetItem(str(self.fiber_price_data[fiber_price_item][j])))
+            fiber_price_item += 1
+
+        self.BudgetTableW.setItem(self.size + len(self.PowerReceptionArray) + 8, 0, QTableWidgetItem('Total (R$)'))
+        print(self.price_total)
+        self.total = self.price_total
+        for item in self.fiber_price_data:
+            print(item[3])
+            self.total += item[3]
+        print(self.total)
+        self.BudgetTableW.setItem(self.size + len(self.PowerReceptionArray) + 8, 1, QTableWidgetItem(str(self.total)))
+
+
+        # Preenche a tabela com os dados 'por estação'
         for table_line in range(0, self.size):
             for table_column in range(0, 4):
-                self.BudgetTableW.setItem(table_line + 1, table_column + 1,
+                self.BudgetTableW.setItem(table_line + 1,
+                                          table_column + 1,
                                           QTableWidgetItem('{0:.0f}'.format(self.Stations[table_line][table_column+2])))
 
-        # Mostra dados para a linha "Qtd. total"
+        # Mostra dados para a linha "Qtd. total "
         for table_column in range(0, 4):
-            self.BudgetTableW.setItem(self.size + 1, table_column + 1,
+            self.BudgetTableW.setItem(self.size + 1,
+                                      table_column + 1,
                                       QTableWidgetItem(str('{0:.0f}'.format(self.equipment_subtotals[table_column]))))
 
         # Mostra dados para a linha "Preço unitário"
@@ -552,6 +597,16 @@ class Interface(QTabWidget):
         # Mostra dados para a linha "Total"
         # for table_column in range(0, 4):
         self.BudgetTableW.setItem(self.size + 4, 1, QTableWidgetItem(str('{0:.2f}'.format(self.price_total))))
+
+        """
+        Segunda tabela
+        | Trecho | Kms | Preço por Kms | Subtotal |
+        -------------------------------------------
+        ...
+        -------------------------------------------
+        | Sub-total | ... | - | ...
+        | Total |
+        """
 
 
 def main():
