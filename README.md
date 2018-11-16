@@ -10,7 +10,8 @@ If you have a working version of `git` on your system you can simply clone this 
 
 or download the ZIP file clicking the green button above.
 
-If you're using any Windows OS, there's an `.exe` file inside the directory (path: ./executable/dist/PDH.exe)
+If you're using any Windows OS, the final `.exe` file will be encountered inside the directory
+```/distros/windows/final_executable/dist/PDH.exe```
 
 ## Dependencies
 
