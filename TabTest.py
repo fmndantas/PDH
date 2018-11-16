@@ -519,7 +519,7 @@ class Interface(QTabWidget):
 
         for path in self.PowerReceptionArray:
             same_node_occurrences = 0
-            print(path)
+            # print(path)
             distance = self.DistMatrix[self.letters.index(path[0])][self.letters.index(path[1])]
             if path[3] == 'Fiber':
                 for j in range(0, len(self.PowerReceptionArray)):
@@ -527,13 +527,13 @@ class Interface(QTabWidget):
                 self.fiber_price_data.append(["{0}-{1}".format(path[0], path[1]),
                                         same_node_occurrences*distance,
                                         self.FiberPrice,
-                                        distance*self.FiberPrice])
+                                        same_nome_occurrences*distance*self.FiberPrice])
             else:
                 self.fiber_price_data.append(["{0}-{1}".format(path[0], path[1]),
                                               '-----',
                                               self.FiberPrice,
                                               '-----'])
-        print(self.fiber_price_data)
+        # print(self.fiber_price_data)
 
         # Cria os labels da primeira tabela
         for i in range(0, self.size):
@@ -563,7 +563,7 @@ class Interface(QTabWidget):
             fiber_price_item += 1
 
         self.BudgetTableW.setItem(self.size + len(self.PowerReceptionArray) + 8, 0, QTableWidgetItem('Total (R$)'))
-        print(self.price_total)
+        # print(self.price_total)
         self.total = self.price_total
         for item in self.fiber_price_data:
             if type(item[3]) != str:
