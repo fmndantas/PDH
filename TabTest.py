@@ -527,7 +527,7 @@ class Interface(QTabWidget):
                 self.fiber_price_data.append(["{0}-{1}".format(path[0], path[1]),
                                         same_node_occurrences*distance,
                                         self.FiberPrice,
-                                        same_nome_occurrences*distance*self.FiberPrice])
+                                        same_node_occurrences*distance*self.FiberPrice])
             else:
                 self.fiber_price_data.append(["{0}-{1}".format(path[0], path[1]),
                                               '-----',
