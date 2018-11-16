@@ -32,6 +32,6 @@ with a simple interface:
 ## Futures updates
 
 * The TL (transmission lines) will be considered
-* For now, the obstacle loss per path is not editable and is fixed in 8 dB
+* For now, the obstacle loss per path is not editable and is fixed in 8 dB. The change in those parameters will be considered in future updates.
 * The budget screen will have a nicely desing :)
 
