@@ -470,7 +470,11 @@ class Interface(QTabWidget):
                     transmission_medium.append(path[3])
                 else:
                     pass
-            self.Stations[i][2] = round(round(self.Stations[i][1]/30)/16) # Total de duplos saltos
+            self.Stations[i][2] = self.Stations[i][1]//30//16 # Total de duplos saltos
+            if self.Stations[i][2] < 1:
+                self.Stations[i][2] = 1
+            else:
+                pass
             for medium in transmission_medium:
                 if medium == 'Radio':
                     self.Stations[i][3] += 1 # Medium
