@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 import numpy as np
 
-
 class Interface(QTabWidget):
     def __init__(self, parent=None):
         super(Interface, self).__init__(parent)
@@ -69,7 +68,7 @@ class Interface(QTabWidget):
         self.DistMatrixBtn.clicked.connect(self.ShowDistMatrix)
         self.layout.addWidget(self.DistMatrixBtn, 2, 2)
 
-        self.ChannelsAndLpsMatrixBtn = QPushButton('Channels and LP\'s\nmatrix')
+        self.ChannelsAndLpsMatrixBtn = QPushButton('Channels\nmatrix')
         self.ChannelsAndLpsMatrixBtn.clicked.connect(self.ShowChannelsMatrix)
         self.layout.addWidget(self.ChannelsAndLpsMatrixBtn, 3, 2)
 
@@ -82,7 +81,7 @@ class Interface(QTabWidget):
 
         self.setTabText(0, "Input window")
         self.InputWindow.setLayout(self.layout)
-        self.setWindowTitle("Input window")
+        self.setWindowTitle("PDH software")
 
     def OutputWindowTab(self):
 
@@ -444,7 +443,7 @@ class Interface(QTabWidget):
     def BudgetTable(self):
 
         self.BudgetTableW = QTableWidget()
-        self.BudgetTableW.setRowCount(20)
+        self.BudgetTableW.setRowCount(self.size + len(self.PowerReceptionArray) + 9)
         self.BudgetTableW.setColumnCount(5)
 
         self.Stations = list()
