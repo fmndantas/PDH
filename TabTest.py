@@ -465,7 +465,6 @@ class Interface(QTabWidget):
             for path in self.PowerReceptionArray:
                 if path[0] == self.letters[i] or path[1] == self.letters[i]:
 
-                    # print('dento do if')
                     self.Stations[i][1] += path[4] # Canais
                     transmission_medium.append(path[3])
                 else:
@@ -502,7 +501,6 @@ class Interface(QTabWidget):
             self.equipment_subtotals[1] += station[3] # Radio
             self.equipment_subtotals[2] += station[4] # Anthenna
             self.equipment_subtotals[3] += station[5] # Modem
-
 
         # price subtotals
         self.prices_subtotals = self.equipment_subtotals.copy()
@@ -568,9 +566,10 @@ class Interface(QTabWidget):
         print(self.price_total)
         self.total = self.price_total
         for item in self.fiber_price_data:
-            print(item[3])
-            self.total += item[3]
-        print(self.total)
+            if type(item[3]) != str:
+                self.total += item[3]
+            else:
+                pass
         self.BudgetTableW.setItem(self.size + len(self.PowerReceptionArray) + 8, 1, QTableWidgetItem(str(self.total)))
 
 
@@ -599,7 +598,7 @@ class Interface(QTabWidget):
                                       QTableWidgetItem(str('{0:.2f}'.format(self.prices_subtotals[table_column]))))
 
         # Mostra dados para a linha "Total"
-        # for table_column in range(0, 4):
+
         self.BudgetTableW.setItem(self.size + 4, 1, QTableWidgetItem(str('{0:.2f}'.format(self.price_total))))
 
         """
