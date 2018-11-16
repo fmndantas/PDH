@@ -48,6 +48,7 @@ Lets say we have the following info for our example:
 | A-E  | ---           | 300      |
 | B-D  | ---           | 480      |
 | C-E  | ---           | 120      |
+
 In the "Distance Matrix" we shall input the information
 from the Distance column above, and in the "Channels Matrix"
 we shall input the corresponding column above. (Private Lines will
