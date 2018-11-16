@@ -29,3 +29,9 @@ with a simple interface:
 
 ![shot1](https://github.com/fmndantas/PDH/master/screenshots/shot1.png?raw=True "Title")
 
+## Futures updates
+
+* The TL (transmission lines) will be considered
+* For now, the obstacle loss per path is not editable and is fixed in 8 dB
+* The budget screen will have a nicely desing :)
+
