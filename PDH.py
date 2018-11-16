@@ -537,14 +537,14 @@ class Interface(QTabWidget):
 
         # Cria os labels da primeira tabela
         for i in range(0, self.size):
-            self.BudgetTableW.setItem(i + 1, 0, QTableWidgetItem('Estação {0}'.format(self.letters[i])))
+            self.BudgetTableW.setItem(i + 1, 0, QTableWidgetItem('Station {0}'.format(self.letters[i])))
 
-        self.BudgetTableW.setItem(self.size + 1, 0, QTableWidgetItem('Qtd. Total'))
-        self.BudgetTableW.setItem(self.size + 2, 0, QTableWidgetItem('Preço unitário (R$)'))
-        self.BudgetTableW.setItem(self.size + 3, 0, QTableWidgetItem('Sub-total I (R$)'))
+        self.BudgetTableW.setItem(self.size + 1, 0, QTableWidgetItem('Total amount'))
+        self.BudgetTableW.setItem(self.size + 2, 0, QTableWidgetItem('Unity price (R$)'))
+        self.BudgetTableW.setItem(self.size + 3, 0, QTableWidgetItem('Subtotal I (R$)'))
         self.BudgetTableW.setItem(self.size + 4, 0, QTableWidgetItem('Total I (R$)'))
-        landscape_labels = ['PCM 30 (qtd.)', 'Duplo salto', 'Radio 480 canais (qtd.)',
-                            'Antena SHF (qtd.)', 'Modem óptico (qtd)']
+        landscape_labels = ['PCM 30 (qtd.)', 'Double jumper', 'Radio 480 channels (qtd.)',
+                            'Anthenna SHF (amount)', 'Optical modem (amount)']
         column_width = 150
         for i in range(0, 5):
             self.BudgetTableW.setColumnWidth(i, column_width)
@@ -552,7 +552,7 @@ class Interface(QTabWidget):
             self.BudgetTableW.setItem(0, j, QTableWidgetItem(landscape_labels[j]))
 
         """ Segunda tabela (labels)  """
-        landscape_labels_2 = ['Trecho', 'kms', 'Preço por km', 'Subtotal']
+        landscape_labels_2 = ['Path', 'kms', 'Price/km', 'Subtotal']
         for j in range(0, 4):
             self.BudgetTableW.setItem(self.size + 6, j, QTableWidgetItem(landscape_labels_2[j]))
 
