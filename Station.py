@@ -9,7 +9,7 @@ class Station:
         self.fatherStation = None
         self.distances = dict()
         self.channels = dict()
-        self.ChannelNamedTuple = namedtuple("Channel", "Type Amount")
+        self.ChannelNamedTuple = namedtuple("Channel", "Type Amount") # Entity used for the channel definition
 
     def __repr__(self):
         return self.name
@@ -33,6 +33,9 @@ class Station:
         Uses GetPath method to encounter the path among two stations
         Put channels in the path encountered
         A motherfucking method
+        ________________________________________________________________
+        Parameters: target station, amount of channels, type of channels
+        ________________________________________________________________
         """
         Path = list(self.GetPath(target)) # Returns the path that links the source (self) station to the target station
         ChannelsToAppend = self.ChannelNamedTuple(type, channels)
@@ -65,7 +68,7 @@ class Station:
                     pass
             i += 1
 
-            """ Old and useless version
+            """ Old/useless version
             _______________________________________________________________________________________
             if neighbor not in self.channels.keys():
                 self.channels[neighbor] = []
@@ -96,7 +99,7 @@ class Station:
     def GetPath(self, target_station):
         """
         :param target_station:
-        :return: the stations of the path, one by one
+        :return: the stations of the path, one by one (generator)
         """
         stack = [(self, [self])]
         while stack:
@@ -109,7 +112,7 @@ class Station:
 
     def ShowStation(self):
         """
-        Shows the station data:
+        Shows the station data
         """
         print("\nName: {0}, Type: {5}\n"
               "Neighborhood: {1}"
@@ -132,6 +135,7 @@ stationB.SetNeighbor(stationC, 30)
 stationB.SetNeighbor(stationE, 18)
 stationA.SetNeighbor(stationD, 8)
 
+"""
 stationA.SetChannels2Station(stationE, 300)
 stationA.SetChannels2Station(stationD, 420)
 stationA.SetChannels2Station(stationD, 30, type="LP")
@@ -145,3 +149,4 @@ stationB.ShowStation()
 stationC.ShowStation()
 stationD.ShowStation()
 stationE.ShowStation()
+"""
