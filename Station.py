@@ -1,8 +1,7 @@
 from collections import namedtuple
-from Equipments import Equipments
 
 class Station:
-    def __init__(self, name, type_of_station):
+    def __init__(self, name, type_of_station="Analog"):
         self.type_of_station = type_of_station
         self.name = name
         self.neighborhood = set()
@@ -130,10 +129,10 @@ stationC = Station("Station C", "Digital")
 stationD = Station("Station D", "Digital")
 stationE = Station("Station E", "Analog")
 
-stationB.SetNeighbor(stationA, 10)
-stationB.SetNeighbor(stationC, 30)
-stationB.SetNeighbor(stationE, 18)
-stationA.SetNeighbor(stationD, 8)
+# stationB.SetNeighbor(stationA, 10)
+# stationB.SetNeighbor(stationC, 30)
+# stationB.SetNeighbor(stationE, 18)
+# stationA.SetNeighbor(stationD, 8)
 
 """
 stationA.SetChannels2Station(stationE, 300)
